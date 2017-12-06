@@ -231,9 +231,9 @@ void Fx1(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 
 {
     const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 9
     const float64 xPosPrev = pX_p->val[nCol*xPosIdx + sigmaIdx];
-    const float64 angularSpeedPrev = pu_p(angularSpeedIdx);
+    const float64 angularSpeedPrev = pu_p->val[angularSpeedIdx];
     const float64 tyreRadPrev = pX_p->val[nCol*tyreRadIdx + sigmaIdx];
-    const float64 thehtaPrev = pX_p->val[nCol*thetaIdx + sigmaIdx];
+    const float64 thethaPrev = pX_p->val[nCol*thetaIdx + sigmaIdx];
 
     pX_m->val[nCol*xPosIdx + sigmaIdx] = xPosPrev + dT * angularSpeedPrev * tyreRadPrev * cos(thethaPrev);
 }
@@ -260,10 +260,10 @@ void Fx1(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 
 void Fx2(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 dT)
 {
     const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 9
-    const float64 xPosPrev = pX_p->val[nCol*xPosIdx + sigmaIdx];
-    const float64 angularSpeedPrev = pu_p(angularSpeedIdx);
+    const float64 yPosPrev = pX_p->val[nCol*xPosIdx + sigmaIdx];
+    const float64 angularSpeedPrev = pu_p->val[angularSpeedIdx];
     const float64 tyreRadPrev = pX_p->val[nCol*tyreRadIdx + sigmaIdx];
-    const float64 thehtaPrev = pX_p->val[nCol*thetaIdx + sigmaIdx];
+    const float64 thethaPrev = pX_p->val[nCol*thetaIdx + sigmaIdx];
 
     pX_m->val[nCol*yPosIdx + sigmaIdx] = yPosPrev + dT * angularSpeedPrev * tyreRadPrev * sin(thethaPrev);
 }
@@ -291,8 +291,8 @@ void Fx3(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 
 {
     const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 9
     const float64 xPosPrev = pX_p->val[nCol*xPosIdx + sigmaIdx];
-    const float64 angularSpeedPrev = pu_p(angularSpeedIdx);
-    const float64 steeringAnglePrev = pu_p(steeringAngleIdx);
+    const float64 angularSpeedPrev = pu_p->val[angularSpeedIdx];
+    const float64 steeringAnglePrev = pu_p->val[steeringAngleIdx];
     const float64 tyreRadPrev = pX_p->val[nCol*tyreRadIdx + sigmaIdx];
     const float64 thehtaPrev = pX_p->val[nCol*thetaIdx + sigmaIdx];
     const float64 WheelBase = 2.8498; //{m}
@@ -351,7 +351,7 @@ void Fx4(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 
 void Hy1(tMatrix * pu, tMatrix * pX_m, tMatrix * pY_m,uint8 sigmaIdx)
 {
     const uint8 nCol = pX_m->ncol;
-    pY_m->val[nCol*xPosIdx + sigmaIdx] = pX_m->val[nCol*xPosIdx + sigmaIdx]
+    pY_m->val[nCol*xPosIdx + sigmaIdx] = pX_m->val[nCol*xPosIdx + sigmaIdx];
 
     pu = pu;
 }
@@ -378,7 +378,7 @@ void Hy1(tMatrix * pu, tMatrix * pX_m, tMatrix * pY_m,uint8 sigmaIdx)
 void Hy2(tMatrix * pu, tMatrix * pX_m, tMatrix * pY_m,uint8 sigmaIdx)
 {
     const uint8 nCol = pX_m->ncol;
-    pY_m->val[nCol*yPosIdx + sigmaIdx] = pX_m->val[nCol*yPosIdx + sigmaIdx]
+    pY_m->val[nCol*yPosIdx + sigmaIdx] = pX_m->val[nCol*yPosIdx + sigmaIdx];
 
     pu = pu;
 }

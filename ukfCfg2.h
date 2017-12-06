@@ -1,6 +1,6 @@
 //UNDER CONSTRUCTION
-#ifndef UKFCFG_H
-#define UKFCFG_H
+#ifndef UKFCFG2_H
+#define UKFCFG2_H
 
 #include "ukfLib.h"
 
