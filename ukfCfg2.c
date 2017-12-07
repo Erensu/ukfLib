@@ -80,8 +80,8 @@ static float64 u_system_input[4][1] = {{0},{0},{0},{0}};
 static float64 u_prev_system_input[4][1] = {{0},{0},{0},{0}};
 static float64 y_meas[2][1] = {{0},{0}};
 static float64 y_predicted_mean[2][1] = {{0},{0}};
-static float64 x_system_states[4][1] = {{0},{0},{0},{0}};
-static float64 x_system_states_ic[4][1] = {{0},{0},{0},{0}};
+static float64 x_system_states[4][1] = {{0},{0},{0},{0.3}};
+static float64 x_system_states_ic[4][1] = {{0},{0},{0},{0.3}};
 static float64 x_system_states_correction[4][1] = {{0},{0},{0},{0}};
 static float64 X_sigma_points[4][9]=
 {/*  s1  s2  s3  s4  s5  s6  s7  s8  s9        */
@@ -205,7 +205,7 @@ tUkfMatrix UkfMatrixCfg2 =
     {COLXROW(Pxx_covariance_correction),NROWS(Pxx_covariance_correction),NCOL(Pxx_covariance_correction),&Pxx_covariance_correction[0][0]},   
     &PredictFcn[0],
     &ObservFcn[0],
-    0.1
+    0.02
 };
 /******************************************************************************************************************************************************************************************************\
  ***  FUNCTION:
