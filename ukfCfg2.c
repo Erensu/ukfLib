@@ -58,7 +58,7 @@ static void Fx4(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, f
 static void Hy1(tMatrix * pu, tMatrix * pX_m, tMatrix * pY_m,uint8 sigmaIdx);
 static void Hy2(tMatrix * pu, tMatrix * pX_m, tMatrix * pY_m,uint8 sigmaIdx);
 
-static tPredictFcn PredictFcn[4] = {&Fx1,&Fx2,&Fx3,&Fx4};
+static tPredictFcn PredictFcn[4] = {&Fx1,&Fx2,&Fx3};
 static tObservFcn  ObservFcn[2] = {&Hy1,&Hy2};
 
 //define state const for easy matrix indexing
@@ -73,56 +73,52 @@ static tObservFcn  ObservFcn[2] = {&Hy1,&Hy2};
 //-----------------------
 //UKF Processing matrix
 //-----------------------
-static float64 Sc_vector[1][3] = {{0.1,2,0}};
-static float64 Wm_weight_vector[1][9] = {{0,0,0,0,0,0,0,0,0}};
-static float64 Wc_weight_vector[1][9] = {{0,0,0,0,0,0,0,0,0}};
-static float64 u_system_input[4][1] = {{0},{0},{0},{0}}; 
-static float64 u_prev_system_input[4][1] = {{0},{0},{0},{0}};
+static float64 Sc_vector[1][3] = {{0.001,0.2,0}};
+static float64 Wm_weight_vector[1][7] = {{0,0,0,0,0,0,0}};
+static float64 Wc_weight_vector[1][7] = {{0,0,0,0,0,0,0}};
+static float64 u_system_input[3][1] = {{0},{0},{0}}; 
+static float64 u_prev_system_input[3][1] = {{0},{0},{0}};
 static float64 y_meas[2][1] = {{0},{0}};
 static float64 y_predicted_mean[2][1] = {{0},{0}};
-static float64 x_system_states[4][1] = {{0},{0},{0},{0.3}};
-static float64 x_system_states_ic[4][1] = {{0},{0},{0},{0.3}};
-static float64 x_system_states_correction[4][1] = {{0},{0},{0},{0}};
-static float64 X_sigma_points[4][9]=
+static float64 x_system_states[3][1] = {{0},{0},{0}};
+static float64 x_system_states_ic[3][1] = {{0},{0},{0}};
+static float64 x_system_states_correction[3][1] = {{0},{0},{0}};
+static float64 X_sigma_points[3][7]=
 {/*  s1  s2  s3  s4  s5  s6  s7  s8  s9        */
-    {0,  0,  0,  0,  0,  0,  0,  0,  0}, /* x1 */
-    {0,  0,  0,  0,  0,  0,  0,  0,  0}, /* x2 */
-    {0,  0,  0,  0,  0,  0,  0,  0,  0}, /* x3 */
-    {0,  0,  0,  0,  0,  0,  0,  0,  0}, /* x4 */
+    {0,  0,  0,  0,  0,  0,  0}, /* x1 */
+    {0,  0,  0,  0,  0,  0,  0}, /* x2 */
+    {0,  0,  0,  0,  0,  0,  0}
 };
 
 //Sigma points Y(k|k-1) = y_m
-static float64 Y_sigma_points[2][9]=
+static float64 Y_sigma_points[2][7]=
 {/*  s1  s2  s3  s4  s5  s6  s7  s8  s9        */
-    {0,  0,  0,  0,  0,  0,  0,  0,  0}, /* y1 */
-    {0,  0,  0,  0,  0,  0,  0,  0,  0}, /* y2 */
+    {0,  0,  0,  0,  0,  0,  0}, /* y1 */
+    {0,  0,  0,  0,  0,  0,  0}, /* y2 */
 };
 
 //State covariance  P(k|k-1) = P_m, P(k)= P  
-static float64 Pxx_error_covariance[4][4]=
+static float64 Pxx_error_covariance[3][3]=
 {/*  x1, x2, x3, x4        */
-    {0,  0,  0,  0}, /* x1 */
-    {0,  0,  0,  0}, /* x2 */ 
-    {0,  0,  0,  0}, /* x3 */  
-    {0,  0,  0,  0}, /* x4 */
+    {0,  0,  0}, /* x1 */
+    {0,  0,  0}, /* x2 */ 
+    {0,  0,  0}, /* x3 */
 };
 
 //State covariance initial values
-static float64 Pxx0_init_error_covariance[4][4]=
+static float64 Pxx0_init_error_covariance[3][3]=
 {/*  x1, x2, x3, x4        */
-    {1,  0,  0,  0}, /* x1 */
-    {0,  1,  0,  0}, /* x2 */ 
-    {0,  0,  1,  0}, /* x3 */  
-    {0,  0,  0,  1}, /* x4 */
+    {100,  0,  0}, /* x1 */
+    {0,  100,  0}, /* x2 */ 
+    {0,  0,  100}
 };
 
 //Process noise covariance Q : initial noise assumptions
-static float64 Qxx_process_noise_cov[4][4]=
+static float64 Qxx_process_noise_cov[3][3]=
 {/*  x1, x2, x3, x4        */
-    {0,  0,  0,  0}, /* x1 */
-    {0,  0,  0,  0}, /* x2 */ 
-    {0,  0,  4,  0}, /* x3 */  
-    {0,  0,  0,  4}, /* x4 */
+    {50,  0,  0}, /* x1 */
+    {0,  50,  0}, /* x2 */ 
+    {0,  0,  50}, /* x3 */
 };
 
 //Output noise covariance: initial noise assumptions
@@ -146,29 +142,26 @@ static float64 Pyy_out_covariance_copy[2][2]=
 };
 
 //cross-covariance of state and output
-static float64 Pxy_cross_covariance[4][2]=
+static float64 Pxy_cross_covariance[3][2]=
 {/*  y1, y2         */
     {0,  0},  /* x1 */
     {0,  0},  /* x2 */
-    {0,  0},  /* x3 */
-    {0,  0},  /* x4 */
+    {0,  0}
 };
 
 //Kalman gain matrix
-static float64 K_kalman_gain[4][2]=
+static float64 K_kalman_gain[3][2]=
 {  
     {0, 0},
     {0, 0},
-    {0, 0},
-    {0, 0},
+    {0, 0}
 };
 
 static float64 Pxx_covariance_correction[4][4]=
 {/*  x1, x2, x3, x4        */
-    {0,  0,  0,  0}, /* x1 */
-    {0,  0,  0,  0}, /* x2 */ 
-    {0,  0,  0,  0}, /* x3 */  
-    {0,  0,  0,  0}, /* x4 */
+    {0,  0,  0}, /* x1 */
+    {0,  0,  0}, /* x2 */ 
+    {0,  0,  0}
 };
 
 static float64 I_identity_matrix[2][2]=
@@ -229,13 +222,13 @@ tUkfMatrix UkfMatrixCfg2 =
 \******************************************************************************************************************************************************************************************************/
 void Fx1(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 dT)
 {
-    const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 9
+    const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 7
     const float64 xPosPrev = pX_p->val[nCol*xPosIdx + sigmaIdx];
     const float64 angularSpeedPrev = pu_p->val[angularSpeedIdx];
     const float64 tyreRadPrev = pX_p->val[nCol*tyreRadIdx + sigmaIdx];
     const float64 thethaPrev = pX_p->val[nCol*thetaIdx + sigmaIdx];
 
-    pX_m->val[nCol*xPosIdx + sigmaIdx] = xPosPrev + dT * angularSpeedPrev * tyreRadPrev * cos(thethaPrev);
+    pX_m->val[nCol*xPosIdx + sigmaIdx] = xPosPrev + dT * angularSpeedPrev * 0.34 * cos(thethaPrev);
 }
 /******************************************************************************************************************************************************************************************************\
  ***  FUNCTION:
@@ -259,13 +252,13 @@ void Fx1(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 
 \******************************************************************************************************************************************************************************************************/
 void Fx2(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 dT)
 {
-    const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 9
+    const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 7
     const float64 yPosPrev = pX_p->val[nCol*xPosIdx + sigmaIdx];
     const float64 angularSpeedPrev = pu_p->val[angularSpeedIdx];
     const float64 tyreRadPrev = pX_p->val[nCol*tyreRadIdx + sigmaIdx];
     const float64 thethaPrev = pX_p->val[nCol*thetaIdx + sigmaIdx];
 
-    pX_m->val[nCol*yPosIdx + sigmaIdx] = yPosPrev + dT * angularSpeedPrev * tyreRadPrev * sin(thethaPrev);
+    pX_m->val[nCol*yPosIdx + sigmaIdx] = yPosPrev + dT * angularSpeedPrev * 0.34 * sin(thethaPrev);
 }
 /******************************************************************************************************************************************************************************************************\
  ***  FUNCTION:
@@ -289,7 +282,7 @@ void Fx2(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 
 \******************************************************************************************************************************************************************************************************/
 void Fx3(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 dT)
 {
-    const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 9
+    const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 7
     const float64 xPosPrev = pX_p->val[nCol*xPosIdx + sigmaIdx];
     const float64 angularSpeedPrev = pu_p->val[angularSpeedIdx];
     const float64 steeringAnglePrev = pu_p->val[steeringAngleIdx];
@@ -297,7 +290,7 @@ void Fx3(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 
     const float64 thehtaPrev = pX_p->val[nCol*thetaIdx + sigmaIdx];
     const float64 WheelBase = 2.8498; //{m}
     
-    pX_m->val[nCol*thetaIdx + sigmaIdx] = thehtaPrev + dT * angularSpeedPrev * tyreRadPrev * (1/WheelBase) * tan(steeringAnglePrev);
+    pX_m->val[nCol*thetaIdx + sigmaIdx] = thehtaPrev + dT * angularSpeedPrev * 0.34 * (1/WheelBase) * tan(steeringAnglePrev);
 
 }
 /******************************************************************************************************************************************************************************************************\
@@ -322,9 +315,9 @@ void Fx3(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 
 \******************************************************************************************************************************************************************************************************/
 void Fx4(tMatrix * pu_p, tMatrix * pX_p, tMatrix * pX_m,uint8 sigmaIdx, float64 dT)
 {
-    const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 9
+    const uint8 nCol = pX_m->ncol; //pX_m->ncol == pX_p->ncol == 7
     
-    pX_m->val[nCol*tyreRadIdx + sigmaIdx] = pX_p->val[nCol*tyreRadIdx + sigmaIdx];
+    pX_m->val[nCol*tyreRadIdx + sigmaIdx] = 0.34;// pX_p->val[nCol*tyreRadIdx + sigmaIdx];
 
     pu_p = pu_p;
     dT = dT;
